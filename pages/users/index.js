@@ -34,7 +34,7 @@ export default function index() {
             <div>
                 {listUser?.dataBase?.map((user) => (
                     <Link key={user.id} href={`/users/${user.id}`}
-                        className="bg-white flex items-center gap-4 p-4 rounded"
+                        className="flex items-center gap-4 p-4 rounded"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

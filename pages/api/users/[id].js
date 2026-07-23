@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+
 function handler(req, res) {
   if (req.method === "GET") {
 
@@ -15,23 +16,52 @@ function handler(req, res) {
       res.status(202).json({ message: "The desired user was found.", data: user })
     } else {
       res.status(404).json({ message: "User not found !!" })
-    }
+    } 
   } else if (req.method === "DELETE") {
     const dbPath = path.join(process.cwd(), "data", "db.json");
     const data = fs.readFileSync(dbPath);
 
     const parsedData = JSON.parse(data);
+    const isUsers = parsedData.dataBase.some((user) => user.id == req.query.id)
 
-    const NewUser = parsedData.dataBase.filter((user) => user.id !== req.query.id);
+    if (isUsers) {
+      const NewUser = parsedData.dataBase.filter((user) => user.id !== req.query.id);
 
-    const err = fs.writeFileSync(dbPath, JSON.stringify({ ...parsedData, dataBase: NewUser }));
+      const err = fs.writeFileSync(dbPath, JSON.stringify({ ...parsedData, dataBase: NewUser }));
 
-    if (err) {
-      return res.json({ message: "delete user error" })
+      if (err) {
+        return res.json({ message: "delete user error" })
+      } else {
+        return res.json({ message: "delete user successfully" })
+      }
     } else {
-      return res.json({ message: "delete user" })
+      return res.status(404).json({ message: "delete user not found !!" })
     }
 
+  } else if (req.method === "PUT") {
+    const { editeName, editeEmail, editePassword } = req.body
+    const dbPath = path.join(process.cwd(), "data", "db.json");
+    const data = fs.readFileSync(dbPath);
+    const parsedData = JSON.parse(data);
+    const isUsers = parsedData.dataBase.some((user) => user.id == req.query.id)
+    if (isUsers) {
+      parsedData.dataBase.some((user) => {
+        if (user.id == req.query.id) {
+          user.name = editeName
+          user.email = editeEmail
+          user.password = editePassword
+          return true
+        }
+      })
+      const err = fs.writeFileSync(dbPath, JSON.stringify({ ...parsedData }));
+      if (err) {
+        //
+      } else {
+        res.json({ message: "user updated successfully", data: parsedData.dataBase })
+      }
+    } else {
+      return res.status(404).json({ message: "user not found !!" })
+    }
   }
 }
 export default handler;
